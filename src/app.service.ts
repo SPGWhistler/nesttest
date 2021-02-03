@@ -4,7 +4,7 @@ const KeyvFile = require('keyv-file').KeyvFile;
 
 const keyv = new Keyv({
   store: new KeyvFile({
-    filename: './titles.json'
+    filename: '../titles.json'
   })
 });
 
