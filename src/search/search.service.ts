@@ -11,6 +11,7 @@ export class SearchService {
    * TODO:
    * - Add in validation using a pipe
    * - Add in documentation and also swager docs
+   * - add in pagination
    */
   async getResultsForQuery(query: string): Promise<Array<any>> {
     /**
@@ -22,12 +23,14 @@ export class SearchService {
      */
     let results;
     try {
-      results = await this.cacheManager.get(query);
+      results = await this.cacheManager.get('searchquery:' + query);
     } catch (ignored) {}
     if (!Array.isArray(results)) {
       results = await this.makeRequest(query);
       results = this.cleanResults(results);
-      await this.cacheManager.set(query, results, { ttl: 86400 }); //cache for 24 hours
+      await this.cacheManager.set('searchquery:' + query, results, {
+        ttl: 86400,
+      }); //cache for 24 hours
     }
     return results;
   }
