@@ -5,6 +5,11 @@ import { SearchService, Results } from './search.service'
 export class SearchController {
   constructor(private readonly searchService: SearchService) {}
 
+  /**
+   * Return a list of search results for the given query.
+   * @param query The query to return results for.
+   * @param page The page of results you want (1 indexed).
+   */
   @Get()
   async getSearchResults(
     @Query('q') query: string,

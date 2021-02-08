@@ -12,6 +12,21 @@ import { BooksService } from './books.service';
 export class BooksController {
   constructor(private readonly booksService: BooksService) {}
 
+  /**
+   * Return information for a book by its good reads id.
+   * You can specify any of the following fields:
+   * id
+   * authors
+   * desc
+   * image
+   * large_image
+   * pages
+   * pub_date
+   * publisher
+   * title
+   * @param id The book id to lookup.
+   * @param fields The fields you want in the response.
+   */
   @Get(':id')
   async getBookResult(
     @Param('id') id: string,

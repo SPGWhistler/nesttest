@@ -5,6 +5,9 @@ import { AppService } from './app.service';
 export class AppController {
   constructor(private readonly appService: AppService) {}
 
+  /**
+   * An entry point for the base path.
+   */
   @Get()
   async getHello(): Promise<any> {
     return await this.appService.getHello();
