@@ -30,7 +30,7 @@ export class SearchSuggestService {
     const bookApiHost = this.configService.get<string>('BOOK_API_HOST');
     const bookApiKey = this.configService.get<string>('BOOK_API_KEY');
     const resp = await got(
-      `${bookApiHost}search/index.xml?key=${bookApiKey}&page=1&search=all&q=${query}`,
+      `${bookApiHost}/search/index.xml?key=${bookApiKey}&page=1&search=all&q=${query}`,
     );
     const jsonObj = parse(resp.body, {});
     let results = [];
