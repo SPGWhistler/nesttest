@@ -1,7 +1,7 @@
 import { Controller, Get, Query } from '@nestjs/common';
 import { SearchSuggestService } from './search-suggest.service';
 
-@Controller('search-suggest')
+@Controller('/v1/search-suggest')
 export class SearchSuggestController {
   constructor(private readonly searchSuggestService: SearchSuggestService) {}
 

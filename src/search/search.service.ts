@@ -61,7 +61,7 @@ export class SearchService {
   cleanResults(results: Array<any>): Array<any> {
     results = results.map((result) => {
       return {
-        id: result.id,
+        id: result.best_book.id,
         title: result.best_book.title,
         image: result.best_book.image_url,
         attr: result.best_book.author.name,
