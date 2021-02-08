@@ -5,6 +5,7 @@ import { parse } from 'fast-xml-parser';
 
 export interface Results {
   totalPages: number;
+  currentPage: number;
   results: Array<any>;
 }
 
@@ -52,6 +53,7 @@ export class SearchService {
     let results: Results = {
       results: [],
       totalPages: 0,
+      currentPage: 0,
     };
     if (
       jsonObj &&
@@ -70,6 +72,7 @@ export class SearchService {
         totalPages: this.calculateTotalPages(
           jsonObj.GoodreadsResponse.search['total-results'] || 0,
         ),
+        currentPage: page,
       };
     }
     return results;
