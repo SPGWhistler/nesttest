@@ -12,7 +12,15 @@ export class SearchController {
   ): Promise<Results> {
     return await this.searchService.getResultsForQuery(
       query,
-      parseInt(page, 10),
+      this.cleanPageNumber(page),
     );
+  }
+
+  cleanPageNumber(dirtyInput: any): number {
+    let parsed = Number.parseInt(dirtyInput, 10);
+    parsed = Number.isNaN(parsed) ? 1 : parsed;
+    if (parsed < 1) return 1;
+    if (parsed > 100) return 100;
+    return parsed;
   }
 }
