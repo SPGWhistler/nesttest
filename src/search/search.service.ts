@@ -17,20 +17,7 @@ export class SearchService {
     @Inject(CACHE_MANAGER) private cacheManager: Cache,
   ) {}
 
-  /**
-   * TODO:
-   * - Add in validation using a pipe
-   * - Add in documentation and also swager docs
-   * - add in pagination
-   */
   async getResultsForQuery(query: string, page = 1): Promise<Results> {
-    /**
-     * - Check cache for query.
-     * - Make request to GoodReads for results.
-     * - Strip results of data we do not need.
-     * - Cache results.
-     * - Return results.
-     */
     let results: Results;
     if (page === 1) {
       try {
@@ -52,35 +39,39 @@ export class SearchService {
   async makeRequest(query: string, page = 1): Promise<Results> {
     const bookApiHost = this.configService.get<string>('BOOK_API_HOST');
     const bookApiKey = this.configService.get<string>('BOOK_API_KEY');
-    const resp = await got(
-      `${bookApiHost}/search/index.xml?key=${bookApiKey}&page=${page}&search=all&q=${query}`,
-    );
-    const jsonObj = parse(resp.body, {});
     let results: Results = {
       results: [],
       totalPages: 0,
       currentPage: 0,
     };
-    if (
-      jsonObj &&
-      jsonObj.GoodreadsResponse &&
-      jsonObj.GoodreadsResponse.search &&
-      jsonObj.GoodreadsResponse.search.results &&
-      jsonObj.GoodreadsResponse.search.results.work
-    ) {
-      if (!Array.isArray(jsonObj.GoodreadsResponse.search.results.work)) {
-        jsonObj.GoodreadsResponse.search.results.work = [
+    try {
+      const resp = await got(
+        `${bookApiHost}/search/index.xml?key=${bookApiKey}&page=${page}&search=all&q=${query}`,
+      );
+      if (resp.statusCode === 200) {
+        const jsonObj = parse(resp.body, {});
+        if (
+          jsonObj &&
+          jsonObj.GoodreadsResponse &&
+          jsonObj.GoodreadsResponse.search &&
+          jsonObj.GoodreadsResponse.search.results &&
           jsonObj.GoodreadsResponse.search.results.work
-        ];
+        ) {
+          if (!Array.isArray(jsonObj.GoodreadsResponse.search.results.work)) {
+            jsonObj.GoodreadsResponse.search.results.work = [
+              jsonObj.GoodreadsResponse.search.results.work
+            ];
+          }
+          results = {
+            results: jsonObj.GoodreadsResponse.search.results.work,
+            totalPages: this.calculateTotalPages(
+              jsonObj.GoodreadsResponse.search['total-results'] || 0,
+            ),
+            currentPage: page,
+          };
+        }
       }
-      results = {
-        results: jsonObj.GoodreadsResponse.search.results.work,
-        totalPages: this.calculateTotalPages(
-          jsonObj.GoodreadsResponse.search['total-results'] || 0,
-        ),
-        currentPage: page,
-      };
-    }
+    } catch (ignored) {}
     return results;
   }
 
@@ -105,6 +96,6 @@ export class SearchService {
         attr: result.best_book.author.name,
       };
     });
-    return results; //TODO
+    return results; //TODO filter fields here
   }
 }

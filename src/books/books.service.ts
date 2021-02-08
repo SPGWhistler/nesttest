@@ -4,6 +4,24 @@ import got from 'got';
 import { parse } from 'fast-xml-parser';
 import { ConfigService } from '@nestjs/config';
 
+interface Author {
+  author_image: string;
+  author_id: number;
+  author_name: string;
+}
+export interface Result {
+  id: number;
+  authors: Array<Author>;
+  desc: string;
+  image: string;
+  large_image: string;
+  isbn13: string;
+  pages: number;
+  pub_date: Date | number;
+  publisher: string;
+  title: string;
+}
+
 @Injectable()
 export class BooksService {
   constructor(
@@ -11,22 +29,34 @@ export class BooksService {
     @Inject(CACHE_MANAGER) private cacheManager: Cache,
   ) {}
 
-  async getResultForId(id: string): Promise<Record<any, unknown>> {
-    let result;
-    //TODO validate user input (probably in controller or before it?)
+  async getResultForId(
+    id: string,
+    fields: string,
+  ): Promise<Record<any, unknown>> {
+    let result: Result;
     try {
       result = await this.cacheManager.get('bookid:' + id);
     } catch (ignored) {}
-    if (!Array.isArray(result)) {
+    if (!result) {
       result = await this.makeRequest(id);
-      result = this.cleanResults(result);
       await this.cacheManager.set('bookid:' + id, result, { ttl: 86400 }); //cache for 24 hours
     }
-    return result;
+    return this.filterResult(result, this.parseFieldsParam(fields));
   }
 
-  async makeRequest(id: string): Promise<Record<any, unknown>> {
-    let result = {};
+  async makeRequest(id: string): Promise<Result> {
+    let result: Result = {
+      id: 0,
+      authors: [],
+      desc: '',
+      image: '',
+      large_image: '',
+      isbn13: '',
+      pages: 0,
+      pub_date: 0,
+      publisher: '',
+      title: '',
+    };
     const bookApiHost = this.configService.get<string>('BOOK_API_HOST');
     const bookApiKey = this.configService.get<string>('BOOK_API_KEY');
     try {
@@ -83,7 +113,41 @@ export class BooksService {
     return output;
   }
 
-  cleanResults(result: Record<any, unknown>): Record<any, unknown> {
-    return result; //TODO
+  filterResult(result: Result, fields: Array<string>): Record<any, unknown> {
+    let output = {};
+    if (fields.length) {
+      Object.keys(result).forEach((key) => {
+        if (fields.includes(key)) {
+          output[key] = result[key];
+        }
+      });
+    } else {
+      output = result;
+    }
+    return output;
+  }
+
+  parseFieldsParam(dirtyFieldsParam: string): Array<string> {
+    let fields = [];
+    if (dirtyFieldsParam && dirtyFieldsParam !== '') {
+      fields = dirtyFieldsParam.split(',').reduce((acc, field) => {
+        field = field.trim();
+        switch (field) {
+          case 'id':
+          case 'authors':
+          case 'desc':
+          case 'image':
+          case 'large_image':
+          case 'pages':
+          case 'pub_date':
+          case 'publisher':
+          case 'title':
+            acc.push(field);
+            break;
+        }
+        return acc;
+      }, []);
+    }
+    return fields;
   }
 }
