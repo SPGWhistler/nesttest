@@ -49,7 +49,10 @@ export class SearchService {
       `https://www.goodreads.com/search/index.xml?key=RDfV4oPehM6jNhxfNQzzQ&page=${page}&search=all&q=${query}`,
     );
     const jsonObj = parse(resp.body, {});
-    let results: Results;
+    let results: Results = {
+      results: [],
+      totalPages: 0,
+    };
     if (
       jsonObj &&
       jsonObj.GoodreadsResponse &&
