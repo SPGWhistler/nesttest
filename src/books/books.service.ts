@@ -2,10 +2,14 @@ import { Injectable, Inject, CACHE_MANAGER } from '@nestjs/common';
 import { Cache } from 'cache-manager';
 import got from 'got';
 import { parse } from 'fast-xml-parser';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class BooksService {
-  constructor(@Inject(CACHE_MANAGER) private cacheManager: Cache) {}
+  constructor(
+    private configService: ConfigService,
+    @Inject(CACHE_MANAGER) private cacheManager: Cache,
+  ) {}
 
   async getResultForId(id: string): Promise<Record<any, unknown>> {
     let result;
@@ -23,9 +27,11 @@ export class BooksService {
 
   async makeRequest(id: string): Promise<Record<any, unknown>> {
     let result = {};
+    const bookApiHost = this.configService.get<string>('BOOK_API_HOST');
+    const bookApiKey = this.configService.get<string>('BOOK_API_KEY');
     try {
       const resp = await got(
-        `https://www.goodreads.com/book/show.xml?key=RDfV4oPehM6jNhxfNQzzQ&id=${id}`,
+        `${bookApiHost}/book/show.xml?key=${bookApiKey}&id=${id}`,
       );
       if (resp.statusCode === 200) {
         const jsonObj = parse(resp.body, {});

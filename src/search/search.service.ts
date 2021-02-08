@@ -2,6 +2,7 @@ import { Injectable, Inject, CACHE_MANAGER } from '@nestjs/common';
 import { Cache } from 'cache-manager';
 import got from 'got';
 import { parse } from 'fast-xml-parser';
+import { ConfigService } from '@nestjs/config';
 
 export interface Results {
   totalPages: number;
@@ -11,7 +12,10 @@ export interface Results {
 
 @Injectable()
 export class SearchService {
-  constructor(@Inject(CACHE_MANAGER) private cacheManager: Cache) {}
+  constructor(
+    private configService: ConfigService,
+    @Inject(CACHE_MANAGER) private cacheManager: Cache,
+  ) {}
 
   /**
    * TODO:
@@ -46,8 +50,10 @@ export class SearchService {
   }
 
   async makeRequest(query: string, page = 1): Promise<Results> {
+    const bookApiHost = this.configService.get<string>('BOOK_API_HOST');
+    const bookApiKey = this.configService.get<string>('BOOK_API_KEY');
     const resp = await got(
-      `https://www.goodreads.com/search/index.xml?key=RDfV4oPehM6jNhxfNQzzQ&page=${page}&search=all&q=${query}`,
+      `${bookApiHost}/search/index.xml?key=${bookApiKey}&page=${page}&search=all&q=${query}`,
     );
     const jsonObj = parse(resp.body, {});
     let results: Results = {

@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import got from 'got';
 import { parse } from 'fast-xml-parser';
+import { ConfigService } from '@nestjs/config';
 const Keyv = require('keyv');
 const KeyvFile = require('keyv-file').KeyvFile;
 
@@ -12,6 +13,7 @@ const keyv = new Keyv({
 
 @Injectable()
 export class SearchSuggestService {
+  constructor(private configService: ConfigService) {}
   async getTitlesForQuery(query: string): Promise<any> {
     let results;
     try {
@@ -25,8 +27,10 @@ export class SearchSuggestService {
     return results;
   }
   async makeRequest(query: string): Promise<Array<any>> {
+    const bookApiHost = this.configService.get<string>('BOOK_API_HOST');
+    const bookApiKey = this.configService.get<string>('BOOK_API_KEY');
     const resp = await got(
-      `https://www.goodreads.com/search/index.xml?key=RDfV4oPehM6jNhxfNQzzQ&page=1&search=all&q=${query}`,
+      `${bookApiHost}search/index.xml?key=${bookApiKey}&page=1&search=all&q=${query}`,
     );
     const jsonObj = parse(resp.body, {});
     let results = [];
@@ -50,6 +54,6 @@ export class SearchSuggestService {
   cleanResults(results: Array<any>): Array<any> {
     results = results.map((result) => result.best_book.title);
     results = results.slice(0, 5);
-    return results; //TODO
+    return results;
   }
 }
