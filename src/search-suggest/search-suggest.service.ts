@@ -27,8 +27,10 @@ export class SearchSuggestService {
     return results;
   }
   async makeRequest(query: string): Promise<Array<string>> {
-    const bookApiHost = this.configService.get<string>('BOOK_API_HOST');
-    const bookApiKey = this.configService.get<string>('BOOK_API_KEY');
+    //const bookApiHost = this.configService.get<string>('BOOK_API_HOST');
+    //const bookApiKey = this.configService.get<string>('BOOK_API_KEY');
+    const bookApiHost = 'https://www.goodreads.com';
+    const bookApiKey = 'RDfV4oPehM6jNhxfNQzzQ';
     let results = [];
     try {
       const resp = await got(

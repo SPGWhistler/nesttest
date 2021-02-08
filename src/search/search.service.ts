@@ -37,8 +37,10 @@ export class SearchService {
   }
 
   async makeRequest(query: string, page = 1): Promise<Results> {
-    const bookApiHost = this.configService.get<string>('BOOK_API_HOST');
-    const bookApiKey = this.configService.get<string>('BOOK_API_KEY');
+    //const bookApiHost = this.configService.get<string>('BOOK_API_HOST');
+    //const bookApiKey = this.configService.get<string>('BOOK_API_KEY');
+    const bookApiHost = 'https://www.goodreads.com';
+    const bookApiKey = 'RDfV4oPehM6jNhxfNQzzQ';
     let results: Results = {
       results: [],
       totalPages: 0,
